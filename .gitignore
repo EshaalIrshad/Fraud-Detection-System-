@@ -2,5 +2,5 @@ data/processed/train_smote.csv
 data/processed/X_train_smote.npy
 data/creditcard.csv
 
-backend/env
+backend/.env
 backend/deployment_info.json
