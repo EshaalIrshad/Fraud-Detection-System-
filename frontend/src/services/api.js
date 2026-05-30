@@ -9,10 +9,18 @@ const BASE_URL = "http://localhost:5000/api";
 // Create axios instance with default config
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // 10 second timeout
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
+});
+// Attach JWT token to every request automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("fraudshield_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // ============================================================

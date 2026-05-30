@@ -14,10 +14,38 @@ load_dotenv()
 
 # Import our ML predictor
 from predictor import predict_transaction, get_model_info
+from flask_jwt_extended import JWTManager
+from models import db, bcrypt, User
+from auth_routes import auth_bp
+import os
 
 # Create Flask app
 app = Flask(__name__)
-CORS(app)  # Allow React frontend to call this API
+
+# Database configuration
+app.config['SQLALCHEMY_DATABASE_URI']        = 'sqlite:///fraudshield.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY']                 = os.getenv(
+    'JWT_SECRET_KEY', 'fraudshield-secret-key-2026'
+)
+app.config['JWT_ACCESS_TOKEN_EXPIRES']       = False
+
+# Initialize extensions
+db.init_app(app)
+bcrypt.init_app(app)
+jwt = JWTManager(app)
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ]
+    }
+})
+
+# Register auth blueprint
+app.register_blueprint(auth_bp)
 
 # In-memory transaction log
 # Stores recent predictions for the dashboard
@@ -352,9 +380,31 @@ def random_transaction():
 # Run the app
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    with app.app_context():
+        # Create all database tables
+        db.create_all()
+
+        # Create default admin account if none exists
+        admin = User.query.filter_by(role='admin').first()
+        if not admin:
+            admin = User(
+                username   = 'admin',
+                name       = 'System Administrator',
+                role       = 'admin',
+                created_by = 'system',
+                is_active  = True
+            )
+            admin.set_password('Admin@2026')
+            db.session.add(admin)
+            db.session.commit()
+            print("Default admin created:")
+            print("  Username: admin")
+            print("  Password: Admin@2026")
+            print("  Change this password after first login!")
+
+    port  = int(os.getenv('PORT', 5000))
     debug = os.getenv('DEBUG', 'True') == 'True'
-    
+
     print("\n" + "="*50)
     print("FRAUD DETECTION API STARTING")
     print("="*50)
@@ -362,14 +412,23 @@ if __name__ == '__main__':
     print(f"  Debug: {debug}")
     print("\nAvailable endpoints:")
     print("  GET  /api/health")
+    print("  POST /api/auth/login")
+    print("  GET  /api/auth/me")
+    print("  POST /api/auth/create-analyst")
+    print("  GET  /api/auth/users")
+    print("  PUT  /api/auth/users/<id>/toggle")
+    print("  PUT  /api/auth/users/<id>/reset-password")
+    print("  POST /api/auth/password-request")
+    print("  GET  /api/auth/password-requests")
+    print("  PUT  /api/auth/password-requests/<id>/resolve")
+    print("  GET  /api/auth/my-request")
     print("  POST /api/predict")
     print("  POST /api/predict/batch")
     print("  GET  /api/transactions")
     print("  GET  /api/model")
-    print("  GET  /api/test/fraud-sample")
     print("  GET  /api/blockchain/status")
     print("  GET  /api/blockchain/record/<id>")
     print("  GET  /api/demo/random-transaction")
     print("="*50 + "\n")
-    
+
     app.run(host='0.0.0.0', port=port, debug=debug)
