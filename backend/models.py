@@ -40,7 +40,7 @@ class User(db.Model):
             'name':       self.name,
             'is_active':  self.is_active,
             'created_by': self.created_by,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat() + 'Z'
         }
 
 
@@ -72,9 +72,30 @@ class PasswordRequest(db.Model):
             'analyst_username': self.analyst.username,
             'status':        self.status,
             'reason':        self.reason,
-            'requested_at':  self.requested_at.isoformat(),
-            'resolved_at':   self.resolved_at.isoformat()
+            'requested_at':  self.requested_at.isoformat() + 'Z',
+            'resolved_at':   self.resolved_at.isoformat() + 'Z'
                              if self.resolved_at else None,
             'resolved_by':   self.resolved_by,
             'reject_reason': self.reject_reason,
+        }
+class Investigation(db.Model):
+    __tablename__ = 'investigations'
+
+    id                   = db.Column(db.Integer, primary_key=True)
+    transaction_id       = db.Column(db.String(100), nullable=False)
+    flagged_by           = db.Column(db.String(80), nullable=False)
+    reason               = db.Column(db.String(500), nullable=False)
+    original_prediction  = db.Column(db.String(20), default='LEGITIMATE')
+    status               = db.Column(db.String(20), default='under_review')
+    created_at           = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id':                  self.id,
+            'transaction_id':      self.transaction_id,
+            'flagged_by':          self.flagged_by,
+            'reason':              self.reason,
+            'original_prediction': self.original_prediction,
+            'status':              self.status,
+            'created_at':          self.created_at.isoformat() + 'Z'
         }

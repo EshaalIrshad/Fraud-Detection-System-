@@ -94,5 +94,5 @@ def get_model_info() -> dict:
         "features": len(feature_names),
         "feature_names": feature_names,
         "description": "XGBoost classifier trained on European "
-                       "Credit Card Fraud dataset with SMOTE balancing"
+                       "Credit Card Fraud dataset"
     }

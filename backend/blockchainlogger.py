@@ -2,17 +2,16 @@ from web3 import Web3
 import json
 import os
 import time
-
+from dotenv import load_dotenv
 # Connect to local Hardhat blockchain
 
 # Hardhat node runs on port 8545
 HARDHAT_URL = "http://127.0.0.1:8545"
 
-# Account #0 from Hardhat node — this is the contract owner
-# Flask uses this account to sign and send transactions
-OWNER_ADDRESS  = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-OWNER_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
+# Flask uses this account to sign and send transactions
+OWNER_ADDRESS  = os.getenv('OWNER_ADDRESS')
+OWNER_PRIVATE_KEY = os.getenv('OWNER_PRIVATE_KEY')
 # Connect to blockchain
 w3 = Web3(Web3.HTTPProvider(HARDHAT_URL))
 
