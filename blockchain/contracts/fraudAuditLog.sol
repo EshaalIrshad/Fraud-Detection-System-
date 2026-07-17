@@ -2,36 +2,26 @@
 pragma solidity ^0.8.19;
 
 /**
- * FraudAuditLog Smart Contract
- * 
- * This contract stores fraud detection results immutably
- * on the blockchain. Once a fraud prediction is logged
- * it cannot be altered or deleted — this is the core
- * value proposition of blockchain for audit trails.
- * 
- * What gets stored for each flagged transaction:
- * - Transaction ID
- * - Timestamp
- * - Fraud confidence score
- * - Top 3 SHAP feature explanations
- * - Model version that made the prediction
- * 
- * Only the contract owner (your Flask backend) can
- * log new fraud records — preventing unauthorised entries.
+    FraudAuditLog Smart Contract
+    What gets stored for each flagged transaction:
+     Transaction ID
+     Timestamp
+     Fraud confidence score
+     Top 3 SHAP feature explanations
+     Model version that made the prediction
+    Only the contract owner can log new fraud records 
  */
 
 contract FraudAuditLog {
 
-    // --- Contract owner ---
-    // Set once at deployment, cannot be changed
-    // Only owner can log fraud records
+    // Contract owner
     address public owner;
 
-    // --- Fraud record counter ---
+    // Fraud record counter
     // Increments with every new fraud log
     uint256 public totalFraudRecords;
 
-    // --- Data structures ---
+    // Data structures
     
     // Represents one SHAP feature explanation
     struct FeatureExplanation {
@@ -52,7 +42,7 @@ contract FraudAuditLog {
         bool exists;                         // for checking if record exists
     }
 
-    // --- Storage ---
+    // Storage
     // Maps record ID to fraud record
     mapping(uint256 => FraudRecord) public fraudRecords;
     
@@ -60,9 +50,9 @@ contract FraudAuditLog {
     // Allows looking up a record by transaction ID
     mapping(string => uint256) public transactionToRecord;
 
-    // --- Events ---
+    // Events
     // Events are emitted when something important happens
-    // Your Flask backend listens for these to confirm logging worked
+    // Flask backend listens for these to confirm logging worked
     event FraudLogged(
         uint256 indexed recordId,
         string transactionId,
@@ -75,7 +65,7 @@ contract FraudAuditLog {
         address indexed newOwner
     );
 
-    // --- Modifiers ---
+    // Modifiers
     // onlyOwner restricts certain functions to the contract owner
     modifier onlyOwner() {
         require(
@@ -85,7 +75,7 @@ contract FraudAuditLog {
         _;
     }
 
-    // --- Constructor ---
+    // Constructor
     // Runs once when contract is deployed
     // Sets the deployer as the owner
     constructor() {
@@ -94,9 +84,7 @@ contract FraudAuditLog {
         emit OwnershipTransferred(address(0), msg.sender);
     }
 
-    // ============================================================
     // FUNCTION 1 — Log a fraud record
-    // ============================================================
     function logFraudRecord(
         string memory _transactionId,
         uint256 _confidenceScore,
@@ -142,9 +130,7 @@ contract FraudAuditLog {
         return newRecordId;
     }
 
-    // ============================================================
     // FUNCTION 2 — Get a fraud record by record ID
-    // ============================================================
     function getFraudRecord(uint256 _recordId) 
         public view returns (
             uint256 recordId,
@@ -187,9 +173,7 @@ contract FraudAuditLog {
         );
     }
 
-    // ============================================================
     // FUNCTION 3 — Get record by transaction ID
-    // ============================================================
     function getRecordByTransactionId(string memory _transactionId)
         public view returns (uint256)
     {
@@ -198,25 +182,19 @@ contract FraudAuditLog {
         return recordId;
     }
 
-    // ============================================================
     // FUNCTION 4 — Check if transaction was flagged as fraud
-    // ============================================================
     function isTransactionFlagged(string memory _transactionId)
         public view returns (bool)
     {
         return transactionToRecord[_transactionId] != 0;
     }
 
-    // ============================================================
     // FUNCTION 5 — Get total fraud records logged
-    // ============================================================
     function getTotalRecords() public view returns (uint256) {
         return totalFraudRecords;
     }
 
-    // ============================================================
     // FUNCTION 6 — Transfer ownership to new address
-    // ============================================================
     function transferOwnership(address _newOwner) public onlyOwner {
         require(_newOwner != address(0), "Invalid address");
         emit OwnershipTransferred(owner, _newOwner);
