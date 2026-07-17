@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { notifyLoginSuccess, notifyLoginError } from "../../utils/notification";
+import { useNavigate } from "react-router-dom";
 
 const LoginScreen = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -7,7 +8,7 @@ const LoginScreen = ({ onLogin }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -48,6 +49,7 @@ const LoginScreen = ({ onLogin }) => {
 
       notifyLoginSuccess(userData);
       onLogin(userData);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       const msg = "Cannot connect to server — is Flask running?";
       setError(msg);
@@ -58,28 +60,70 @@ const LoginScreen = ({ onLogin }) => {
   };
 
   const globalCSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=DM+Sans:wght@400;500&display=swap');
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     .login-bg {
       min-height: 100vh;
-      background: #f0f4f8;
+      position: relative;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'DM Sans', sans-serif;
+      padding: 24px;
+      background: linear-gradient(135deg, #eef4fb 0%, #dbe9f7 50%, #c9def2 100%);
+    }
+
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .bg-blob-1 {
+      width: 420px;
+      height: 420px;
+      background: #a9cdf2;
+      top: -140px;
+      left: -120px;
+    }
+
+    .bg-blob-2 {
+      width: 380px;
+      height: 380px;
+      background: #185fa5;
+      opacity: 0.25;
+      bottom: -160px;
+      right: -100px;
+    }
+
+    .bg-blob-3 {
+      width: 260px;
+      height: 260px;
+      background: #ffffff;
+      opacity: 0.5;
+      bottom: 8%;
+      left: 6%;
     }
 
     .login-card {
       display: flex;
-      width: 860px;
-      min-height: 520px;
-      border-radius: 20px;
+      width: 100%;
+      max-width: 780px;
+      min-height: 480px;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 2;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 25px 60px rgba(13, 42, 78, 0.18);
     }
 
+    /* ── Left: branding panel ── */
     .brand-panel {
       flex: 1;
       background: #0d2a4e;
@@ -87,101 +131,108 @@ const LoginScreen = ({ onLogin }) => {
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 32px;
+      padding: 36px 32px;
     }
 
     .hex-bg {
       position: absolute;
       inset: 0;
-      opacity: 0.07;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V18L28 2l28 16v32L28 66zM28 98L0 82V50l28-16 28 16v32L28 98z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='90'%3E%3Cpath d='M26 60L0 45V15L26 0l26 15v30L26 60zM26 90L0 75V45l26-15 26 15v30L26 90z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
     }
 
-    .glow-ring {
-      position: absolute;
-      width: 320px; height: 320px;
-      border-radius: 50%;
-      border: 1px solid rgba(56, 139, 253, 0.2);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .glow-ring-inner {
-      position: absolute;
-      width: 220px; height: 220px;
-      border-radius: 50%;
-      border: 1px solid rgba(56, 139, 253, 0.15);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(24, 95, 165, 0.25) 0%, transparent 70%);
-    }
-
-    .shield-wrap {
+    .brand-top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       position: relative;
       z-index: 2;
-      margin-bottom: 28px;
     }
 
-    .shield-svg {
-      filter: drop-shadow(0 0 24px rgba(56, 139, 253, 0.5));
+    .shield-mini {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
     }
 
-    .brand-name {
+    .brand-name-small {
       font-family: 'Sora', sans-serif;
-      font-size: 26px;
+      font-size: 19px;
       font-weight: 700;
       color: #ffffff;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-mid {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       position: relative;
       z-index: 2;
-      margin-bottom: 8px;
+      padding: 20px 0;
+    }
+
+    .shield-big {
+      width: 92px;
+      height: 106px;
+      filter: drop-shadow(0 0 18px rgba(56, 139, 253, 0.45));
+      margin-bottom: 22px;
     }
 
     .brand-tagline {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.45);
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
       text-align: center;
-      position: relative;
-      z-index: 2;
-      line-height: 1.6;
-      max-width: 200px;
+      line-height: 1.55;
+      max-width: 230px;
+      font-weight: 500;
     }
 
     .badge-row {
       display: flex;
       gap: 8px;
-      margin-top: 28px;
       position: relative;
       z-index: 2;
+      margin-top: auto;
     }
 
     .badge {
-      background: rgba(56, 139, 253, 0.15);
-      border: 0.5px solid rgba(56, 139, 253, 0.3);
-      border-radius: 20px;
-      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(56, 139, 253, 0.14);
+      border: 1px solid rgba(56, 139, 253, 0.35);
+      border-radius: 999px;
+      padding: 5px 11px;
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.6);
+      color: #9cc4f0;
+      font-weight: 500;
     }
 
+    .badge svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    /* ── Right: glass form panel ── */
     .form-panel {
-      flex: 1.1;
-      background: linear-gradient(135deg, #ffffff 0%, #e8f1fb 50%, #c8ddf5 100%);
+      flex: 1.05;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(232, 241, 251, 0.65));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-left: 1px solid rgba(255, 255, 255, 0.6);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 48px 44px;
-    }
-
-    .form-heading {
-      margin-bottom: 28px;
+      padding: 44px 42px;
+      position: relative;
     }
 
     .form-title {
       font-family: 'Sora', sans-serif;
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 700;
       color: #0d2a4e;
       margin-bottom: 6px;
@@ -191,6 +242,8 @@ const LoginScreen = ({ onLogin }) => {
       font-size: 13px;
       color: #4a6fa5;
       line-height: 1.6;
+      margin-bottom: 26px;
+      max-width: 320px;
     }
 
     .input-group {
@@ -203,58 +256,64 @@ const LoginScreen = ({ onLogin }) => {
       font-weight: 500;
       color: #2d5080;
       margin-bottom: 6px;
-      letter-spacing: 0.03em;
     }
 
     .input-wrapper {
       position: relative;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 11px 42px 11px 14px;
-      border: 0.5px solid rgba(24, 95, 165, 0.25);
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      background: rgba(255, 255, 255, 0.75);
-      color: #0d2a4e;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    }
-
-    .form-input::placeholder {
-      color: #8aaacf;
-    }
-
-    .form-input:focus {
-      border-color: #185fa5;
-      box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.12);
-      background: rgba(255, 255, 255, 0.95);
-    }
-
-    .input-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #4a6fa5;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 2px;
       display: flex;
       align-items: center;
     }
 
-    .input-icon:hover {
-      color: #185fa5;
+    .lead-icon {
+      position: absolute;
+      left: 13px;
+      color: #6396d0;
+      display: flex;
+      pointer-events: none;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px 11px 38px;
+      border: 1px solid rgba(24, 95, 165, 0.18);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(6px);
+      color: #0d2a4e;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .form-input::placeholder {
+      color: #9bb3d1;
+    }
+
+    .form-input:focus {
+      border-color: #185fa5;
+      box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.14);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #8aaacf;
+      display: flex;
+      padding: 2px;
+    }
+
+    .eye-btn:hover {
+      color: #4a6fa5;
     }
 
     .error-msg {
-      background: rgba(220, 38, 38, 0.1);
-      border: 0.5px solid rgba(220, 38, 38, 0.3);
+      background: rgba(220, 38, 38, 0.08);
+      border: 1px solid rgba(220, 38, 38, 0.25);
       border-radius: 8px;
       padding: 10px 14px;
       color: #b91c1c;
@@ -265,47 +324,36 @@ const LoginScreen = ({ onLogin }) => {
       gap: 8px;
     }
 
-    .remember-row {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: #4a6fa5;
-      cursor: pointer;
-      margin-bottom: 20px;
-      user-select: none;
-    }
-
-    .remember-row input[type="checkbox"] {
-      accent-color: #185fa5;
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-    }
-
     .login-btn {
       width: 100%;
-      padding: 13px;
+      margin-top: 6px;
+      padding: 12px;
       background: #185fa5;
       border: none;
       border-radius: 10px;
       color: #ffffff;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 14.5px;
+      font-weight: 500;
       font-family: 'Sora', sans-serif;
       cursor: pointer;
-      letter-spacing: 0.01em;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 8px 20px rgba(24, 95, 165, 0.25);
     }
 
     .login-btn:hover:not(:disabled) {
       background: #0c447c;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(24, 95, 165, 0.3);
+    }
+
+    .login-btn:active:not(:disabled) {
+      transform: scale(0.99);
     }
 
     .login-btn:disabled {
-      opacity: 0.65;
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
@@ -320,14 +368,12 @@ const LoginScreen = ({ onLogin }) => {
       border-top: 2px solid #ffffff;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
     }
 
-    @media (max-width: 680px) {
-      .login-card { flex-direction: column; width: 94vw; }
-      .brand-panel { padding: 36px 24px; min-height: 220px; }
-      .form-panel { padding: 36px 28px; }
+    @media (max-width: 640px) {
+      .login-card { flex-direction: column; }
+      .brand-panel { padding: 28px; min-height: 220px; }
+      .form-panel { padding: 36px 28px; border-left: none; border-top: 1px solid rgba(255,255,255,0.6); }
     }
   `;
 
@@ -335,18 +381,42 @@ const LoginScreen = ({ onLogin }) => {
     <>
       <style>{globalCSS}</style>
       <div className="login-bg">
+        <div className="bg-blob bg-blob-1" />
+        <div className="bg-blob bg-blob-2" />
+        <div className="bg-blob bg-blob-3" />
+
         <div className="login-card">
           {/* Left: branding panel */}
           <div className="brand-panel">
             <div className="hex-bg" />
-            <div className="glow-ring" />
-            <div className="glow-ring-inner" />
 
-            <div className="shield-wrap">
+            <div className="brand-top-row">
               <svg
-                className="shield-svg"
-                width="100"
-                height="116"
+                className="shield-mini"
+                viewBox="0 0 100 116"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M50 4L8 20v32c0 26.5 18 51.3 42 58 24-6.7 42-31.5 42-58V20L50 4z"
+                  fill="rgba(24,95,165,0.4)"
+                  stroke="#388bfd"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M36 54l9 9 19-19"
+                  stroke="#9cc4f0"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="brand-name-small">FraudShield</span>
+            </div>
+
+            <div className="brand-mid">
+              <svg
+                className="shield-big"
                 viewBox="0 0 100 116"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -354,50 +424,72 @@ const LoginScreen = ({ onLogin }) => {
                 <path
                   d="M50 4L8 20v32c0 26.5 18 51.3 42 58 24-6.7 42-31.5 42-58V20L50 4z"
                   fill="rgba(24,95,165,0.35)"
-                  stroke="rgba(56,139,253,0.7)"
+                  stroke="rgba(56,139,253,0.75)"
                   strokeWidth="1.5"
                 />
                 <path
                   d="M50 14L16 27.6v24.4c0 21.2 14.4 41 34 46.4 19.6-5.4 34-25.2 34-46.4V27.6L50 14z"
-                  fill="rgba(24,95,165,0.2)"
-                  stroke="rgba(56,139,253,0.4)"
+                  fill="rgba(24,95,165,0.22)"
+                  stroke="rgba(56,139,253,0.45)"
                   strokeWidth="1"
                 />
                 <path
                   d="M36 54l9 9 19-19"
                   stroke="#388bfd"
-                  strokeWidth="3.5"
+                  strokeWidth="4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
-            </div>
-
-            <p className="brand-name">FraudShield</p>
-            <p className="brand-tagline">
-              Smarter Fraud Detection, Safer Transactions.
-            </p>
-
-            <div className="badge-row">
-              <span className="badge">ML-Powered</span>
-              <span className="badge">Real-time</span>
-            </div>
-          </div>
-
-          {/* Right: form panel */}
-          <div className="form-panel">
-            <div className="form-heading">
-              <h1 className="form-title">Welcome Back!</h1>
-              <p className="form-sub">
-                Log in to access your dashboard, manage your account, and
-                continue securely with full control.
+              <p className="brand-tagline">
+                Smarter fraud detection, safer transactions.
               </p>
             </div>
 
+            <div className="badge-row">
+              <span className="badge">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2a4 4 0 0 0-4 4v1a3 3 0 0 0-2 2.8V12a3 3 0 0 0 1.5 2.6V17a3 3 0 0 0 3 3h3a3 3 0 0 0 3-3v-2.4A3 3 0 0 0 18 12V9.8a3 3 0 0 0-2-2.8V6a4 4 0 0 0-4-4z" />
+                </svg>
+                ML-powered
+              </span>
+              <span className="badge">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13 2 3 14h7l-1 8 11-12h-7z" />
+                </svg>
+                Real-time
+              </span>
+            </div>
+          </div>
+
+          {/* Right: glass form panel */}
+          <div className="form-panel">
+            <h1 className="form-title">Welcome back</h1>
+            <p className="form-sub">Log in to access the system</p>
+
             <form onSubmit={handleLogin}>
+              {/* Username */}
               <div className="input-group">
                 <label className="input-label">Username</label>
                 <div className="input-wrapper">
+                  <span className="lead-icon">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 21v-1a7 7 0 0 1 14 0v1" />
+                    </svg>
+                  </span>
                   <input
                     className="form-input"
                     type="text"
@@ -409,13 +501,26 @@ const LoginScreen = ({ onLogin }) => {
                     }}
                     autoComplete="username"
                   />
-                  <span className="input-icon">👤</span>
                 </div>
               </div>
 
+              {/* Password */}
               <div className="input-group">
                 <label className="input-label">Password</label>
                 <div className="input-wrapper">
+                  <span className="lead-icon">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <rect x="4" y="11" width="16" height="9" rx="2" />
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
+                  </span>
                   <input
                     className="form-input"
                     type={showPass ? "text" : "password"}
@@ -426,19 +531,45 @@ const LoginScreen = ({ onLogin }) => {
                       setError("");
                     }}
                     autoComplete="current-password"
-                    style={{ paddingRight: "48px" }}
+                    style={{ paddingRight: "40px" }}
                   />
                   <button
                     type="button"
-                    className="input-icon"
+                    className="eye-btn"
                     onClick={() => setShowPass(!showPass)}
                     aria-label={showPass ? "Hide password" : "Show password"}
                   >
-                    {showPass ? "🙈" : "👁"}
+                    {showPass ? (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M3 3l18 18" />
+                        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                        <path d="M9.9 4.2A9.8 9.8 0 0 1 12 4c5 0 9 4 10 8-.4 1.4-1.1 2.7-2 3.8M6.1 6.1C4.2 7.4 2.8 9.5 2 12c1 4 5 8 10 8 1.1 0 2.1-.2 3-.5" />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
 
+              {/* Error */}
               {error && (
                 <div className="error-msg">
                   <span>⚠</span>
@@ -446,6 +577,7 @@ const LoginScreen = ({ onLogin }) => {
                 </div>
               )}
 
+              {/* Submit */}
               <button
                 type="submit"
                 className="login-btn"
@@ -457,7 +589,19 @@ const LoginScreen = ({ onLogin }) => {
                     Authenticating...
                   </>
                 ) : (
-                  "Login to the Dashboard"
+                  <>
+                    Login to the dashboard
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </>
                 )}
               </button>
             </form>

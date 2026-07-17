@@ -7,6 +7,8 @@ import FraudTrendChart from "../components/charts/FraudTrendChart";
 import FeatureChart from "../components/charts/FeatureChart";
 import { Activity, AlertTriangle, ShieldCheck, Link } from "lucide-react";
 import { formatNumber, formatPercent } from "../utils/formatters";
+import InvestigationSummary from "../components/analyst/InvestigationSummary";
+import PasswordRequest from "../components/analyst/PasswordRequest";
 
 const DashboardPage = ({
   user,
@@ -18,9 +20,9 @@ const DashboardPage = ({
   lastUpdated,
   refresh,
   blockchainStatus,
+  metrics,
 }) => {
   const fraudRate = totalCount > 0 ? fraudCount / totalCount : 0;
-  const catchRate = 0.821;
   const chainRecords = blockchainStatus?.total_fraud_records || 0;
 
   const styles = {
@@ -45,9 +47,10 @@ const DashboardPage = ({
     },
     twoCol: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "1fr 320px",
       gap: theme.spacing.lg,
       marginBottom: theme.spacing.lg,
+      alignItems: "start",
     },
     fullWidth: {
       marginBottom: theme.spacing.lg,
@@ -77,8 +80,12 @@ const DashboardPage = ({
         />
         <MetricCard
           title="Detection Rate"
-          value={formatPercent(catchRate)}
-          subtitle="82.1% fraud caught"
+          value={
+            metrics?.performance_metrics?.metrics?.recall
+              ? `${(metrics.performance_metrics.metrics.recall * 100).toFixed(1)}%`
+              : "82.1%"
+          }
+          subtitle="fraud caught by model"
           icon={ShieldCheck}
           color={theme.colors.legitimate}
           trend="XGBoost model"
@@ -98,15 +105,25 @@ const DashboardPage = ({
         <DemoPanel onTransactionSent={refresh} />
       </div>
 
-      {/* Transaction table */}
-      <div style={styles.fullWidth}>
+      {/* Transaction table + Investigation Summary for both roles */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 300px",
+          gap: theme.spacing.lg,
+          marginBottom: theme.spacing.lg,
+          alignItems: "start",
+        }}
+      >
         <TransactionTable
           transactions={transactions}
           loading={loading}
           error={error}
           lastUpdated={lastUpdated}
           onRefresh={refresh}
+          user={user}
         />
+        <InvestigationSummary />
       </div>
 
       {/* Charts */}

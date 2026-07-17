@@ -51,28 +51,28 @@ const Sidebar = ({ user, onLogout }) => {
     sidebar: {
       width: "220px",
       minHeight: "100vh",
-      backgroundColor: "#0f172a",
+      backgroundColor: "#ffffff",
       display: "flex",
       flexDirection: "column",
       position: "fixed",
       top: 0,
       left: 0,
       zIndex: 200,
-      borderRight: "1px solid rgba(255,255,255,0.08)",
+      borderRight: "1px solid #e2e8f0",
     },
     logo: {
       display: "flex",
       alignItems: "center",
       gap: "10px",
       padding: `${theme.spacing.lg} ${theme.spacing.md}`,
-      borderBottom: "1px solid rgba(255,255,255,0.08)",
+      borderBottom: "1px solid #e2e8f0",
       marginBottom: theme.spacing.sm,
     },
     logoIcon: {
       width: "36px",
       height: "36px",
       borderRadius: "10px",
-      background: "linear-gradient(135deg, #1a56db, #7c3aed)",
+      background: "#1a56db",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -82,12 +82,12 @@ const Sidebar = ({ user, onLogout }) => {
     logoText: {
       fontSize: "16px",
       fontWeight: 700,
-      color: "#ffffff",
+      color: "#0f172a",
       margin: 0,
     },
     logoSub: {
       fontSize: "10px",
-      color: "rgba(255,255,255,0.4)",
+      color: "#94a3b8",
       margin: 0,
     },
     nav: {
@@ -97,7 +97,7 @@ const Sidebar = ({ user, onLogout }) => {
     navLabel: {
       fontSize: "10px",
       fontWeight: 600,
-      color: "rgba(255,255,255,0.3)",
+      color: "#94a3b8",
       textTransform: "uppercase",
       letterSpacing: "0.08em",
       padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
@@ -112,36 +112,35 @@ const Sidebar = ({ user, onLogout }) => {
       marginBottom: "2px",
       cursor: "pointer",
       transition: theme.transition,
-      backgroundColor: active ? "rgba(26, 86, 219, 0.25)" : "transparent",
-      border: active
-        ? "1px solid rgba(26, 86, 219, 0.4)"
-        : "1px solid transparent",
-      color: active ? "#ffffff" : "rgba(255,255,255,0.55)",
+      backgroundColor: active ? "#e8f0fe" : "transparent",
+      border: "none",
+      color: active ? "#1a56db" : "#64748b",
     }),
     linkLabel: {
       fontSize: "14px",
-      fontWeight: 500,
+      fontWeight: (active) => (active ? 600 : 400),
     },
     userSection: {
       padding: theme.spacing.md,
-      borderTop: "1px solid rgba(255,255,255,0.08)",
+      borderTop: "1px solid #e2e8f0",
       marginTop: "auto",
     },
     userCard: {
-      backgroundColor: "rgba(255,255,255,0.06)",
+      backgroundColor: "#f8fafc",
       borderRadius: theme.radius.md,
       padding: "10px 12px",
       marginBottom: "8px",
+      border: "1px solid #e2e8f0",
     },
     userName: {
       fontSize: "13px",
       fontWeight: 600,
-      color: "#ffffff",
+      color: "#0f172a",
       margin: "0 0 2px 0",
     },
     userRole: {
       fontSize: "11px",
-      color: "rgba(255,255,255,0.4)",
+      color: "#94a3b8",
       margin: 0,
     },
     roleBadge: {
@@ -150,13 +149,9 @@ const Sidebar = ({ user, onLogout }) => {
       borderRadius: theme.radius.full,
       fontSize: "10px",
       fontWeight: 600,
-      backgroundColor:
-        user?.role === "admin"
-          ? "rgba(26, 86, 219, 0.3)"
-          : "rgba(124, 58, 237, 0.3)",
-      color: user?.role === "admin" ? "#93c5fd" : "#c4b5fd",
+      backgroundColor: user?.role === "admin" ? "#e8f0fe" : "#f5f3ff",
+      color: user?.role === "admin" ? "#1a56db" : "#7c3aed",
       marginTop: "4px",
-      display: "block",
       textTransform: "uppercase",
       letterSpacing: "0.05em",
     },
@@ -167,9 +162,9 @@ const Sidebar = ({ user, onLogout }) => {
       width: "100%",
       padding: "8px 12px",
       borderRadius: theme.radius.md,
-      border: "1px solid rgba(255,255,255,0.1)",
+      border: "1px solid #e2e8f0",
       backgroundColor: "transparent",
-      color: "rgba(255,255,255,0.5)",
+      color: "#515d6f",
       fontSize: "13px",
       cursor: "pointer",
       transition: theme.transition,
@@ -180,7 +175,9 @@ const Sidebar = ({ user, onLogout }) => {
     <div style={styles.sidebar}>
       {/* Logo */}
       <div style={styles.logo}>
-        <div style={styles.logoIcon}>🛡</div>
+        <div style={styles.logoIcon}>
+          <Shield size={20} color="#ffffff" />
+        </div>
         <div>
           <p style={styles.logoText}>FraudShield</p>
           <p style={styles.logoSub}>Fraud Detection</p>
@@ -199,15 +196,14 @@ const Sidebar = ({ user, onLogout }) => {
               onClick={() => navigate(path)}
               onMouseEnter={(e) => {
                 if (!active) {
-                  e.currentTarget.style.backgroundColor =
-                    "rgba(255,255,255,0.06)";
-                  e.currentTarget.style.color = "#ffffff";
+                  e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  e.currentTarget.style.color = "#1a56db";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!active) {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.55)";
+                  e.currentTarget.style.color = "#64748b";
                 }
               }}
             >
@@ -229,14 +225,14 @@ const Sidebar = ({ user, onLogout }) => {
           style={styles.logoutBtn}
           onClick={onLogout}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(220, 38, 38, 0.15)";
-            e.currentTarget.style.color = "#fca5a5";
+            e.currentTarget.style.backgroundColor = "rgba(220, 38, 38, 0.08)";
+            e.currentTarget.style.color = "#dc2626";
             e.currentTarget.style.borderColor = "rgba(220, 38, 38, 0.3)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+            e.currentTarget.style.color = "#515d6f";
+            e.currentTarget.style.borderColor = "#e2e8f0";
           }}
         >
           <LogOut size={15} />

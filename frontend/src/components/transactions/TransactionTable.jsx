@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { theme } from "../../styles/theme";
 import TransactionRow from "./TransactionRow";
 import TransactionModal from "./TransactionModal";
-import { RefreshCw, Filter } from "lucide-react";
+import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { timeAgo } from "../../utils/formatters";
+
+const PAGE_SIZE = 7;
 
 const TransactionTable = ({
   transactions,
@@ -11,15 +13,30 @@ const TransactionTable = ({
   error,
   lastUpdated,
   onRefresh,
+  user,
 }) => {
   const [selectedTx, setSelectedTx] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
   const filtered = transactions.filter((tx) => {
     if (filter === "fraud") return tx.prediction === "FRAUD";
     if (filter === "legitimate") return tx.prediction === "LEGITIMATE";
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+
+  // Reset to page 1 when filter changes
+  const handleFilter = (f) => {
+    setFilter(f);
+    setPage(1);
+  };
 
   const styles = {
     container: {
@@ -113,6 +130,64 @@ const TransactionTable = ({
       backgroundColor: theme.colors.legitimate,
       animation: "pulse 2s infinite",
     },
+    pagination: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
+      borderTop: `1px solid ${theme.colors.border}`,
+      backgroundColor: theme.colors.background,
+    },
+    pageInfo: {
+      fontSize: theme.fonts.sizes.sm,
+      color: theme.colors.textMuted,
+    },
+    pageControls: {
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+    },
+    pageBtn: (active, disabled) => ({
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "30px",
+      height: "30px",
+      borderRadius: theme.radius.md,
+      border: `1px solid ${active ? theme.colors.primary : theme.colors.border}`,
+      backgroundColor: active ? theme.colors.primary : "transparent",
+      color: active
+        ? "#ffffff"
+        : disabled
+          ? theme.colors.textMuted
+          : theme.colors.textSecondary,
+      fontSize: theme.fonts.sizes.sm,
+      fontWeight: active
+        ? theme.fonts.weights.semibold
+        : theme.fonts.weights.normal,
+      cursor: disabled ? "not-allowed" : "pointer",
+      opacity: disabled ? 0.4 : 1,
+      transition: theme.transition,
+    }),
+  };
+
+  // Build page number array with ellipsis for large page counts
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [1];
+    if (safePage > 3) pages.push("...");
+    for (
+      let i = Math.max(2, safePage - 1);
+      i <= Math.min(totalPages - 1, safePage + 1);
+      i++
+    ) {
+      pages.push(i);
+    }
+    if (safePage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
   };
 
   return (
@@ -141,7 +216,7 @@ const TransactionTable = ({
               <button
                 key={f}
                 style={styles.filterBtn(filter === f)}
-                onClick={() => setFilter(f)}
+                onClick={() => handleFilter(f)}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
@@ -183,7 +258,7 @@ const TransactionTable = ({
             No transactions yet — send a prediction to see results here
           </div>
         ) : (
-          filtered.map((tx, i) => (
+          paginated.map((tx, i) => (
             <TransactionRow
               key={tx.transaction_id}
               transaction={tx}
@@ -192,6 +267,62 @@ const TransactionTable = ({
             />
           ))
         )}
+
+        {/* Pagination */}
+        {!loading && !error && filtered.length > PAGE_SIZE && (
+          <div style={styles.pagination}>
+            <span style={styles.pageInfo}>
+              Showing {(safePage - 1) * PAGE_SIZE + 1}–
+              {Math.min(safePage * PAGE_SIZE, filtered.length)} of{" "}
+              {filtered.length} transactions
+            </span>
+
+            <div style={styles.pageControls}>
+              {/* Prev */}
+              <button
+                style={styles.pageBtn(false, safePage === 1)}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {/* Page numbers */}
+              {getPageNumbers().map((p, i) =>
+                p === "..." ? (
+                  <span
+                    key={`ellipsis-${i}`}
+                    style={{
+                      width: "30px",
+                      textAlign: "center",
+                      fontSize: theme.fonts.sizes.sm,
+                      color: theme.colors.textMuted,
+                    }}
+                  >
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={p}
+                    style={styles.pageBtn(p === safePage, false)}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </button>
+                ),
+              )}
+
+              {/* Next */}
+              <button
+                style={styles.pageBtn(false, safePage === totalPages)}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail modal */}
@@ -199,6 +330,7 @@ const TransactionTable = ({
         <TransactionModal
           transaction={selectedTx}
           onClose={() => setSelectedTx(null)}
+          user={user}
         />
       )}
     </>

@@ -18,10 +18,9 @@ import {
   notifyApiOffline,
   notifyLogout,
 } from "./utils/notification";
+import { useModelMetrics } from "./hooks/useModelMetrics";
 
-// ============================================================
 // Status Bar — top bar showing API + blockchain status
-// ============================================================
 const TopBar = ({ apiStatus, blockchainStatus }) => {
   const styles = {
     bar: {
@@ -84,9 +83,7 @@ const TopBar = ({ apiStatus, blockchainStatus }) => {
   );
 };
 
-// ============================================================
 // Protected Route wrapper
-// ============================================================
 const ProtectedRoute = ({ children, adminOnly = false, user }) => {
   if (!user) return <Navigate to="/login" replace />;
   if (adminOnly && user.role !== "admin") {
@@ -95,12 +92,11 @@ const ProtectedRoute = ({ children, adminOnly = false, user }) => {
   return children;
 };
 
-// ============================================================
 // Main App Layout (after login)
-// ============================================================
 const AppLayout = ({ user, onLogout }) => {
   const [apiStatus, setApiStatus] = useState("checking");
   const prevApiStatus = useRef(null);
+  const { metrics } = useModelMetrics();
 
   const {
     transactions,
@@ -211,6 +207,7 @@ const AppLayout = ({ user, onLogout }) => {
                     lastUpdated={lastUpdated}
                     refresh={refresh}
                     blockchainStatus={blockchainStatus}
+                    metrics={metrics}
                   />
                 </ProtectedRoute>
               }
@@ -221,18 +218,7 @@ const AppLayout = ({ user, onLogout }) => {
               path="/blockchain"
               element={
                 <ProtectedRoute user={user} adminOnly>
-                  <BlockchainPage
-                    blockchainStatus={blockchainStatus}
-                    walletConnected={walletConnected}
-                    walletAccount={walletAccount}
-                    walletBalance={walletBalance}
-                    walletConnecting={walletConnecting}
-                    walletError={walletError}
-                    txHistory={txHistory}
-                    isMetaMaskInstalled={isMetaMaskInstalled}
-                    onWalletConnect={connectWallet}
-                    onWalletDisconnect={disconnectWallet}
-                  />
+                  <BlockchainPage blockchainStatus={blockchainStatus} />
                 </ProtectedRoute>
               }
             />
@@ -266,21 +252,67 @@ const AppLayout = ({ user, onLogout }) => {
   );
 };
 
-// ============================================================
 // Root App
-// ============================================================
 export default function App() {
-  const { user, isAuthenticated, login, logout } = useAuth();
+  // 1. Extract 'loading' from useAuth instead of letting it be undefined
+  const { user, isAuthenticated, login, logout, loading } = useAuth();
 
   const handleLogout = () => {
     notifyLogout();
     logout();
   };
 
+  // Wait for session check before rendering anything
+  // Prevents flash of login screen or dashboard
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f8fafc",
+          fontFamily: "Inter, sans-serif",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              border: "3px solid #e2e8f0",
+              borderTop: "3px solid #1a56db",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+              margin: "0 auto 16px",
+            }}
+          />
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "14px",
+              margin: 0,
+            }}
+          >
+            Loading FraudShield...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <BrowserRouter>
-        <LoginScreen onLogin={login} />
+        <Routes>
+          <Route path="*" element={<LoginScreen onLogin={login} />} />
+        </Routes>
       </BrowserRouter>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { theme } from "../../styles/theme";
 import {
   LineChart,
@@ -8,25 +8,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 
-// Generates mock trend data based on real transaction history
-// In a production system this would come from a database
-// For FYP demo it shows realistic fraud trend patterns
-
 const generateTrendData = (transactions) => {
-  if (!transactions || transactions.length === 0) {
-    // Generate demo data if no transactions yet
-    return Array.from({ length: 12 }, (_, i) => ({
-      time: `${String(i * 5).padStart(2, "0")}:00`,
-      total: Math.floor(Math.random() * 50) + 20,
-      fraud: Math.floor(Math.random() * 5),
-      legitimate: Math.floor(Math.random() * 45) + 20,
-    }));
-  }
+  if (!transactions || transactions.length === 0) return [];
 
-  // Group real transactions by minute
   const groups = {};
   transactions.forEach((tx) => {
     const date = new Date(tx.timestamp);
@@ -39,7 +25,21 @@ const generateTrendData = (transactions) => {
     else groups[key].legitimate++;
   });
 
-  return Object.values(groups).sort((a, b) => a.time.localeCompare(b.time));
+  const sorted = Object.values(groups).sort((a, b) =>
+    a.time.localeCompare(b.time),
+  );
+
+  // Need at least 2 points for a line
+  if (sorted.length === 1) {
+    sorted.unshift({
+      time: "start",
+      total: 0,
+      fraud: 0,
+      legitimate: 0,
+    });
+  }
+
+  return sorted;
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -88,7 +88,9 @@ const FraudTrendChart = ({ transactions }) => {
     legitimate: false,
   });
 
-  const data = generateTrendData(transactions);
+  const data = useMemo(() => generateTrendData(transactions), [transactions]);
+
+  const hasData = data.length >= 2;
 
   const styles = {
     container: {
@@ -108,12 +110,12 @@ const FraudTrendChart = ({ transactions }) => {
       fontSize: theme.fonts.sizes.lg,
       fontWeight: theme.fonts.weights.semibold,
       color: theme.colors.textPrimary,
-      margin: 0,
+      margin: "0 0 4px 0",
     },
     subtitle: {
       fontSize: theme.fonts.sizes.sm,
       color: theme.colors.textMuted,
-      margin: "2px 0 0 0",
+      margin: 0,
     },
     toggles: {
       display: "flex",
@@ -132,6 +134,27 @@ const FraudTrendChart = ({ transactions }) => {
         ? theme.fonts.weights.medium
         : theme.fonts.weights.normal,
     }),
+    emptyState: {
+      height: "220px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      color: theme.colors.textMuted,
+      gap: "8px",
+    },
+    emptyIcon: {
+      fontSize: "32px",
+    },
+    emptyText: {
+      fontSize: theme.fonts.sizes.md,
+      margin: 0,
+    },
+    emptyHint: {
+      fontSize: theme.fonts.sizes.sm,
+      margin: 0,
+      color: theme.colors.textMuted,
+    },
   };
 
   const toggleLine = (name) => {
@@ -144,82 +167,98 @@ const FraudTrendChart = ({ transactions }) => {
         <div>
           <p style={styles.title}>Transaction Trend</p>
           <p style={styles.subtitle}>
-            Live transaction volume and fraud detection
+            {hasData
+              ? `${transactions.length} transactions this session`
+              : "Send transactions to see live trend data"}
           </p>
         </div>
-        <div style={styles.toggles}>
-          {[
-            ["total", "Total", theme.colors.primary],
-            ["fraud", "Fraud", theme.colors.fraud],
-            ["legitimate", "Legitimate", theme.colors.legitimate],
-          ].map(([key, label, color]) => (
-            <button
-              key={key}
-              style={styles.toggleBtn(activeLines[key], color)}
-              onClick={() => toggleLine(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+
+        {/* Only show toggles when there is real data */}
+        {hasData && (
+          <div style={styles.toggles}>
+            {[
+              ["total", "Total", theme.colors.primary],
+              ["fraud", "Fraud", theme.colors.fraud],
+              ["legitimate", "Legitimate", theme.colors.legitimate],
+            ].map(([key, label, color]) => (
+              <button
+                key={key}
+                style={styles.toggleBtn(activeLines[key], color)}
+                onClick={() => toggleLine(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={data}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={theme.colors.border}
-            vertical={false}
-          />
-          <XAxis
-            dataKey="time"
-            tick={{ fontSize: 11, fill: theme.colors.textMuted }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fontSize: 11, fill: theme.colors.textMuted }}
-            axisLine={false}
-            tickLine={false}
-            width={30}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          {activeLines.total && (
-            <Line
-              type="monotone"
-              dataKey="total"
-              name="Total"
-              stroke={theme.colors.primary}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
+      {!hasData ? (
+        <div style={styles.emptyState}>
+          <span style={styles.emptyIcon}>📊</span>
+          <p style={styles.emptyText}>No transaction data yet</p>
+          <p style={styles.emptyHint}>
+            Use the demo panel to send transactions
+          </p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={data}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.colors.border}
+              vertical={false}
             />
-          )}
-          {activeLines.fraud && (
-            <Line
-              type="monotone"
-              dataKey="fraud"
-              name="Fraud"
-              stroke={theme.colors.fraud}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-              strokeDasharray="4 2"
+            <XAxis
+              dataKey="time"
+              tick={{ fontSize: 11, fill: theme.colors.textMuted }}
+              axisLine={false}
+              tickLine={false}
             />
-          )}
-          {activeLines.legitimate && (
-            <Line
-              type="monotone"
-              dataKey="legitimate"
-              name="Legitimate"
-              stroke={theme.colors.legitimate}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
+            <YAxis
+              tick={{ fontSize: 11, fill: theme.colors.textMuted }}
+              axisLine={false}
+              tickLine={false}
+              width={30}
             />
-          )}
-        </LineChart>
-      </ResponsiveContainer>
+            <Tooltip content={<CustomTooltip />} />
+            {activeLines.total && (
+              <Line
+                type="monotone"
+                dataKey="total"
+                name="Total"
+                stroke={theme.colors.primary}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            )}
+            {activeLines.fraud && (
+              <Line
+                type="monotone"
+                dataKey="fraud"
+                name="Fraud"
+                stroke={theme.colors.fraud}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+                strokeDasharray="4 2"
+              />
+            )}
+            {activeLines.legitimate && (
+              <Line
+                type="monotone"
+                dataKey="legitimate"
+                name="Legitimate"
+                stroke={theme.colors.legitimate}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

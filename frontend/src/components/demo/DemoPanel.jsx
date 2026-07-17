@@ -183,15 +183,15 @@ const DemoPanel = ({ onTransactionSent }) => {
     <div style={styles.container}>
       <p style={styles.title}>Demo — Send Real Test Transaction</p>
       <p style={styles.subtitle}>
-        Samples a real transaction from your test dataset and runs it through
-        the full ML + blockchain pipeline
+        Samples a real transaction from the test dataset and runs it through the
+        full ML + blockchain pipeline
       </p>
 
       <div style={styles.infoBox}>
         <span>ℹ</span>
         <span>
-          Transactions are randomly sampled from your 56,746-row test set.
-          Results are genuine model predictions.
+          Transactions are randomly sampled from the test set. Results are
+          genuine model predictions.
         </span>
       </div>
 

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+//import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
 import App from "./App";
 
@@ -22,7 +22,6 @@ root.render(
     <App />
     {/* DevTools — shows query states in development */}
     {/* Appears as a small icon bottom-left of screen */}
-    <ReactQueryDevtools initialIsOpen={false} />
     <Toaster
       position="top-right"
       reverseOrder={false}

@@ -1,21 +1,9 @@
 import React from "react";
 import { theme } from "../styles/theme";
 import AuditLog from "../components/blockchain/AuditLog";
-import TxExplorer from "../components/blockchain/TxExplorer";
-import { Link, Shield, Activity } from "lucide-react";
-import { shortenAddress } from "../utils/formatters";
+import { Shield, Database } from "lucide-react";
 
-const BlockchainPage = ({
-  blockchainStatus,
-  walletConnected,
-  walletAccount,
-  txHistory,
-  isMetaMaskInstalled,
-  onWalletConnect,
-  onWalletDisconnect,
-  walletConnecting,
-  walletError,
-}) => {
+const BlockchainPage = ({ blockchainStatus }) => {
   const styles = {
     page: {
       padding: theme.spacing.xl,
@@ -33,7 +21,7 @@ const BlockchainPage = ({
     },
     statusGrid: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr",
       gap: theme.spacing.md,
       marginBottom: theme.spacing.lg,
     },
@@ -71,10 +59,42 @@ const BlockchainPage = ({
       backgroundColor: online ? theme.colors.legitimate : theme.colors.fraud,
       marginRight: "6px",
     }),
+    infoBox: {
+      backgroundColor: theme.colors.blockchainLight,
+      border: `1px solid ${theme.colors.blockchain}30`,
+      borderRadius: theme.radius.lg,
+      padding: theme.spacing.lg,
+      marginBottom: theme.spacing.lg,
+      display: "flex",
+      gap: theme.spacing.lg,
+      alignItems: "flex-start",
+    },
+    infoIcon: {
+      width: "40px",
+      height: "40px",
+      borderRadius: theme.radius.md,
+      backgroundColor: `${theme.colors.blockchain}15`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    infoTitle: {
+      fontSize: theme.fonts.sizes.md,
+      fontWeight: theme.fonts.weights.semibold,
+      color: theme.colors.blockchain,
+      margin: "0 0 6px 0",
+    },
+    infoText: {
+      fontSize: theme.fonts.sizes.sm,
+      color: theme.colors.textSecondary,
+      margin: 0,
+      lineHeight: 1.6,
+    },
     fullWidth: {
       marginBottom: theme.spacing.lg,
     },
-    walletSection: {
+    contractSection: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       border: `1px solid ${theme.colors.border}`,
@@ -82,7 +102,7 @@ const BlockchainPage = ({
       marginBottom: theme.spacing.lg,
       boxShadow: theme.shadows.sm,
     },
-    walletTitle: {
+    contractTitle: {
       fontSize: theme.fonts.sizes.lg,
       fontWeight: theme.fonts.weights.semibold,
       color: theme.colors.textPrimary,
@@ -91,18 +111,31 @@ const BlockchainPage = ({
       alignItems: "center",
       gap: "8px",
     },
-    connectBtn: {
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      padding: "8px 16px",
+    contractGrid: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: theme.spacing.md,
+    },
+    contractItem: {
+      backgroundColor: theme.colors.background,
       borderRadius: theme.radius.md,
-      border: `1px solid ${theme.colors.primary}`,
-      backgroundColor: theme.colors.primaryLight,
-      color: theme.colors.primary,
-      fontSize: theme.fonts.sizes.md,
-      fontWeight: theme.fonts.weights.medium,
-      cursor: "pointer",
+      padding: theme.spacing.md,
+      border: `1px solid ${theme.colors.border}`,
+    },
+    contractLabel: {
+      fontSize: theme.fonts.sizes.xs,
+      fontWeight: theme.fonts.weights.semibold,
+      color: theme.colors.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+      margin: "0 0 6px 0",
+    },
+    contractValue: {
+      fontSize: theme.fonts.sizes.sm,
+      color: theme.colors.textPrimary,
+      fontFamily: "monospace",
+      margin: 0,
+      wordBreak: "break-all",
     },
   };
 
@@ -141,113 +174,26 @@ const BlockchainPage = ({
           <p style={styles.statusValue}>
             #{blockchainStatus?.block_number || "—"}
           </p>
-          <p style={styles.statusSub}>
-            {blockchainStatus?.node_url || "http://127.0.0.1:8545"}
+          <p style={styles.statusSub}>Current chain height</p>
+        </div>
+      </div>
+
+      {/* How it works info box */}
+      <div style={styles.infoBox}>
+        <div style={styles.infoIcon}>
+          <Shield size={20} color={theme.colors.blockchain} />
+        </div>
+        <div>
+          <p style={styles.infoTitle}>How Blockchain Audit Logging Works</p>
+          <p style={styles.infoText}>
+            Every transaction flagged as fraud by the XGBoost model is
+            automatically logged to the local Hardhat blockchain by the Flask
+            backend. Each record is signed by the contract owner account and
+            stored in the smart contract. Once written to the blockchain, no
+            record can be altered or deleted.
           </p>
         </div>
       </div>
-
-      {/* MetaMask wallet section */}
-      <div style={styles.walletSection}>
-        <p style={styles.walletTitle}>
-          <Shield size={18} color={theme.colors.blockchain} />
-          Wallet Connection
-        </p>
-
-        {walletConnected ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: theme.spacing.md,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 14px",
-                borderRadius: theme.radius.full,
-                backgroundColor: theme.colors.legitimateLight,
-                border: `1px solid ${theme.colors.legitimateBorder}`,
-              }}
-            >
-              <span
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: theme.colors.legitimate,
-                  display: "inline-block",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: theme.fonts.sizes.sm,
-                  fontWeight: theme.fonts.weights.medium,
-                  color: theme.colors.legitimate,
-                  fontFamily: "monospace",
-                }}
-              >
-                {shortenAddress(walletAccount)}
-              </span>
-            </div>
-            <button
-              onClick={onWalletDisconnect}
-              style={{
-                padding: "6px 14px",
-                borderRadius: theme.radius.md,
-                border: `1px solid ${theme.colors.border}`,
-                backgroundColor: "transparent",
-                color: theme.colors.textMuted,
-                fontSize: theme.fonts.sizes.sm,
-                cursor: "pointer",
-              }}
-            >
-              Disconnect
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p
-              style={{
-                fontSize: theme.fonts.sizes.sm,
-                color: theme.colors.textMuted,
-                marginBottom: theme.spacing.md,
-              }}
-            >
-              Connect MetaMask to watch live blockchain events as fraud is
-              detected and logged in real time.
-            </p>
-            <button
-              style={styles.connectBtn}
-              onClick={onWalletConnect}
-              disabled={walletConnecting}
-            >
-              🦊 {walletConnecting ? "Connecting..." : "Connect MetaMask"}
-            </button>
-            {walletError && (
-              <p
-                style={{
-                  color: theme.colors.fraud,
-                  fontSize: theme.fonts.sizes.sm,
-                  marginTop: "8px",
-                }}
-              >
-                {walletError}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Live blockchain events */}
-      {walletConnected && (
-        <div style={styles.fullWidth}>
-          <TxExplorer txHistory={txHistory} account={walletAccount} />
-        </div>
-      )}
 
       {/* Audit log */}
       <div style={styles.fullWidth}>

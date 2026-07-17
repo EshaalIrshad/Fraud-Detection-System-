@@ -19,6 +19,10 @@ import BlockchainBadge from "../cards/BlockchainBadge";
 const TransactionRow = ({ transaction, onClick, index }) => {
   const isFraud = transaction.prediction === "FRAUD";
   const riskColor = getRiskColor(transaction.fraud_probability);
+  const isSuspicious =
+    !isFraud && transaction.investigation_status === "suspicious";
+  const isEscalated =
+    !isFraud && transaction.investigation_status === "confirmed_fraud";
 
   const styles = {
     row: {
@@ -33,7 +37,9 @@ const TransactionRow = ({ transaction, onClick, index }) => {
       transition: theme.transition,
       borderLeft: isFraud
         ? `3px solid ${theme.colors.fraud}`
-        : `3px solid transparent`,
+        : isSuspicious || isEscalated
+          ? `3px solid #b45309`
+          : `3px solid transparent`,
     },
     cell: {
       fontSize: theme.fonts.sizes.md,
@@ -96,11 +102,107 @@ const TransactionRow = ({ transaction, onClick, index }) => {
         {timeAgo(transaction.timestamp)}
       </div>
 
-      {/* Prediction badge */}
-      <div style={styles.cell}>
+      {/* Prediction badge + investigation status */}
+      <div
+        style={{
+          ...styles.cell,
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+        }}
+      >
         <span style={styles.badge(isFraud)}>
           {isFraud ? "⚠ FRAUD" : "✓ CLEAR"}
         </span>
+
+        {/* FRAUD — has investigation status */}
+        {isFraud && transaction.investigation_status && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              color:
+                transaction.investigation_status === "confirmed_fraud"
+                  ? "#dc2626"
+                  : transaction.investigation_status === "false_positive"
+                    ? "#64748b"
+                    : transaction.investigation_status === "suspicious"
+                      ? "#b45309"
+                      : "#d97706",
+              backgroundColor:
+                transaction.investigation_status === "confirmed_fraud"
+                  ? "#fef2f2"
+                  : transaction.investigation_status === "false_positive"
+                    ? "#f8fafc"
+                    : transaction.investigation_status === "suspicious"
+                      ? "#fffbeb"
+                      : "#fffbeb",
+              padding: "1px 6px",
+              borderRadius: "999px",
+              display: "inline-block",
+            }}
+          >
+            {transaction.investigation_status === "confirmed_fraud"
+              ? "● Confirmed"
+              : transaction.investigation_status === "false_positive"
+                ? "● False Positive"
+                : transaction.investigation_status === "suspicious"
+                  ? "● Suspicious"
+                  : "● Under Review"}
+          </span>
+        )}
+
+        {/* FRAUD — not yet reviewed */}
+        {isFraud && !transaction.investigation_status && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              color: "#d97706",
+              backgroundColor: "#fffbeb",
+              padding: "1px 6px",
+              borderRadius: "999px",
+              display: "inline-block",
+              animation: "pulse 2s infinite",
+            }}
+          >
+            ● Needs Review
+          </span>
+        )}
+
+        {/* LEGITIMATE — analyst marked as suspicious */}
+        {isSuspicious && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              color: "#b45309",
+              backgroundColor: "#fffbeb",
+              padding: "1px 6px",
+              borderRadius: "999px",
+              display: "inline-block",
+            }}
+          >
+            ● Suspicious
+          </span>
+        )}
+
+        {/* LEGITIMATE — analyst escalated as confirmed fraud (false negative) */}
+        {isEscalated && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              color: "#dc2626",
+              backgroundColor: "#fef2f2",
+              padding: "1px 6px",
+              borderRadius: "999px",
+              display: "inline-block",
+            }}
+          >
+            ● Escalated
+          </span>
+        )}
       </div>
 
       {/* Fraud probability */}

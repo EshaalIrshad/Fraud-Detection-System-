@@ -8,11 +8,13 @@ import {
   formatResponseTime,
   formatSHAP,
 } from "../../utils/formatters";
+import SHAPWaterfallChart from "../charts/SHAPWaterfallChart";
+import InvestigationPanel from "./InvestigationPanel";
 
 // Full detail popup when user clicks a transaction
 // Shows prediction, confidence, SHAP features, blockchain info
 
-const TransactionModal = ({ transaction, onClose }) => {
+const TransactionModal = ({ transaction, onClose, user }) => {
   const isFraud = transaction.prediction === "FRAUD";
 
   const styles = {
@@ -32,7 +34,7 @@ const TransactionModal = ({ transaction, onClose }) => {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.xl,
       boxShadow: theme.shadows.lg,
-      width: "560px",
+      width: "680px",
       maxHeight: "85vh",
       overflowY: "auto",
       padding: theme.spacing.xl,
@@ -205,37 +207,110 @@ const TransactionModal = ({ transaction, onClose }) => {
           ))}
         </div>
 
-        {/* SHAP Features */}
+        {/* SHAP Waterfall Chart */}
         {transaction.top_features && (
           <>
-            <p style={styles.sectionTitle}>
-              Why this prediction? (SHAP Explanation)
-            </p>
-            {transaction.top_features.map((f, i) => (
-              <div key={i} style={styles.featureRow}>
-                <span style={styles.featureName}>{f.feature}</span>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <span style={styles.shapBar(f.shap_value)} />
-                  <span style={styles.shapValue(f.shap_value)}>
-                    {formatSHAP(f.shap_value)}
-                  </span>
-                  <span
-                    style={{
-                      marginLeft: "8px",
-                      fontSize: theme.fonts.sizes.xs,
-                      color:
-                        f.direction === "FRAUD"
-                          ? theme.colors.fraud
-                          : theme.colors.legitimate,
-                      fontWeight: theme.fonts.weights.medium,
-                    }}
-                  >
-                    → {f.direction}
-                  </span>
-                </div>
-              </div>
-            ))}
+            <div
+              style={{
+                height: "1px",
+                backgroundColor: theme.colors.border,
+                margin: `${theme.spacing.md} 0`,
+              }}
+            />
+            <SHAPWaterfallChart
+              features={transaction.top_features}
+              fraudProbability={transaction.fraud_probability}
+              prediction={transaction.prediction}
+            />
           </>
+        )}
+
+        {/* Investigation Panel — fraud cases only */}
+        {user?.role === "analyst" && (
+          <InvestigationPanel
+            transaction={transaction}
+            onStatusUpdated={(status, notes) => {
+              // Update local transaction object
+              transaction.investigation_status = status;
+              transaction.investigation_notes = notes;
+            }}
+          />
+        )}
+        {/* Admin sees status read-only if analyst has reviewed */}
+        {user?.role === "admin" && transaction.investigation_status && (
+          <div
+            style={{
+              marginTop: theme.spacing.md,
+              padding: theme.spacing.md,
+              backgroundColor: theme.colors.background,
+              borderRadius: theme.radius.lg,
+              border: `1px solid ${theme.colors.border}`,
+            }}
+          >
+            <p
+              style={{
+                fontSize: theme.fonts.sizes.sm,
+                fontWeight: theme.fonts.weights.semibold,
+                color: theme.colors.textMuted,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                margin: "0 0 10px 0",
+              }}
+            >
+              Analyst Investigation
+            </p>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "4px 12px",
+                borderRadius: theme.radius.full,
+                backgroundColor:
+                  transaction.investigation_status === "confirmed_fraud"
+                    ? "#fef2f2"
+                    : transaction.investigation_status === "false_positive"
+                      ? "#f8fafc"
+                      : transaction.investigation_status === "suspicious"
+                        ? "#fffbeb"
+                        : "#fffbeb",
+                color:
+                  transaction.investigation_status === "confirmed_fraud"
+                    ? "#dc2626"
+                    : transaction.investigation_status === "false_positive"
+                      ? "#64748b"
+                      : transaction.investigation_status === "suspicious"
+                        ? "#b45309"
+                        : "#d97706",
+                fontSize: theme.fonts.sizes.sm,
+                fontWeight: theme.fonts.weights.semibold,
+              }}
+            >
+              {transaction.investigation_status === "confirmed_fraud"
+                ? "● Confirmed Fraud"
+                : transaction.investigation_status === "false_positive"
+                  ? "● False Positive"
+                  : transaction.investigation_status === "suspicious"
+                    ? "● Suspicious"
+                    : "● Under Review"}
+            </div>
+            {transaction.investigation_notes && (
+              <p
+                style={{
+                  fontSize: theme.fonts.sizes.sm,
+                  color: theme.colors.textSecondary,
+                  backgroundColor: theme.colors.surface,
+                  padding: "8px 12px",
+                  borderRadius: theme.radius.md,
+                  marginTop: "8px",
+                  border: `1px solid ${theme.colors.border}`,
+                  fontStyle: "italic",
+                }}
+              >
+                "{transaction.investigation_notes}"
+              </p>
+            )}
+          </div>
         )}
 
         {/* Blockchain info */}
