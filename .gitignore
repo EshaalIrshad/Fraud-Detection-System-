@@ -6,3 +6,4 @@ backend/.env
 backend/deployment_info.json
 notebooks/
 ml/
+data/
