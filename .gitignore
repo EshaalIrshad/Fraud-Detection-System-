@@ -4,3 +4,5 @@ data/creditcard.csv
 
 backend/.env
 backend/deployment_info.json
+notebooks/
+ml/
