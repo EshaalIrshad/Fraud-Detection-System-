@@ -250,7 +250,7 @@ const InvestigationPanel = ({ transaction, onStatusUpdated }) => {
     },
   };
 
-  // ── LEGITIMATE transaction — flag as suspicious only ──────
+  // LEGITIMATE transaction — flag as suspicious only
   if (!isFraud) {
     return (
       <div style={styles.container}>
@@ -303,7 +303,7 @@ const InvestigationPanel = ({ transaction, onStatusUpdated }) => {
     );
   }
 
-  // ── FRAUD transaction — existing status workflow ──────────
+  // FRAUD transaction — existing status workflow
   return (
     <div style={styles.container}>
       <p style={styles.title}>

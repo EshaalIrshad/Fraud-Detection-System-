@@ -3,9 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  console.log("=".repeat(50));
   console.log("DEPLOYING FRAUD AUDIT LOG CONTRACT");
-  console.log("=".repeat(50));
 
   // Get the deployer account
   // This is Hardhat's first test account automatically
@@ -64,13 +62,7 @@ async function main() {
     "../../backend/deployment_info.json",
   );
   fs.writeFileSync(backendPath, JSON.stringify(deploymentInfo, null, 2));
-  console.log("Deployment info also saved to backend folder");
-
-  console.log("\n" + "=".repeat(50));
   console.log("DEPLOYMENT COMPLETE");
-  console.log("=".repeat(50));
-  console.log("\nNext step: Update backend/blockchain_logger.py");
-  console.log("with contract address:", contractAddress);
 }
 
 main()

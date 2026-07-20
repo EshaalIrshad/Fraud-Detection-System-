@@ -85,29 +85,29 @@ const LoginScreen = ({ onLogin }) => {
     }
 
     .bg-blob-1 {
-      width: 420px;
-      height: 420px;
+      width: 420px; height: 420px;
       background: #a9cdf2;
-      top: -140px;
-      left: -120px;
+      top: -140px; left: -120px;
     }
 
     .bg-blob-2 {
-      width: 380px;
-      height: 380px;
+      width: 380px; height: 380px;
       background: #185fa5;
       opacity: 0.25;
-      bottom: -160px;
-      right: -100px;
+      bottom: -160px; right: -100px;
     }
 
     .bg-blob-3 {
-      width: 260px;
-      height: 260px;
+      width: 260px; height: 260px;
       background: #ffffff;
       opacity: 0.5;
-      bottom: 8%;
-      left: 6%;
+      bottom: 8%; left: 6%;
+    }
+
+    /* ── Card entrance ── */
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .login-card {
@@ -121,6 +121,7 @@ const LoginScreen = ({ onLogin }) => {
       z-index: 2;
       border: 1px solid rgba(255, 255, 255, 0.5);
       box-shadow: 0 25px 60px rgba(13, 42, 78, 0.18);
+      animation: cardEntrance 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
     /* ── Left: branding panel ── */
@@ -150,8 +151,7 @@ const LoginScreen = ({ onLogin }) => {
     }
 
     .shield-mini {
-      width: 34px;
-      height: 34px;
+      width: 34px; height: 34px;
       flex-shrink: 0;
     }
 
@@ -174,11 +174,48 @@ const LoginScreen = ({ onLogin }) => {
       padding: 20px 0;
     }
 
+    /* ── Shield pulse glow ── */
+    @keyframes shieldPulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 18px rgba(56, 139, 253, 0.45));
+      }
+      50% {
+        filter: drop-shadow(0 0 32px rgba(56, 139, 253, 0.85))
+                drop-shadow(0 0 60px rgba(56, 139, 253, 0.3));
+      }
+    }
+
     .shield-big {
       width: 92px;
       height: 106px;
-      filter: drop-shadow(0 0 18px rgba(56, 139, 253, 0.45));
       margin-bottom: 22px;
+      animation: shieldPulse 2.8s ease-in-out 1;
+    }
+
+    /* ── Scan line ── */
+    @keyframes scanLine {
+      0%   { top: 18%; opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { top: 82%; opacity: 0; }
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(56, 139, 253, 0.8),
+        transparent
+      );
+      border-radius: 2px;
+      animation: scanLine 2.8s ease-in-out 1; 
+      pointer-events: none;
+      z-index: 3;
     }
 
     .brand-tagline {
@@ -211,15 +248,12 @@ const LoginScreen = ({ onLogin }) => {
       font-weight: 500;
     }
 
-    .badge svg {
-      width: 13px;
-      height: 13px;
-    }
+    .badge svg { width: 13px; height: 13px; }
 
     /* ── Right: glass form panel ── */
     .form-panel {
       flex: 1.05;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(232, 241, 251, 0.65));
+      background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(232,241,251,0.65));
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-left: 1px solid rgba(255, 255, 255, 0.6);
@@ -230,12 +264,19 @@ const LoginScreen = ({ onLogin }) => {
       position: relative;
     }
 
+    /* ── Staggered form entrance ── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     .form-title {
       font-family: 'Sora', sans-serif;
       font-size: 23px;
       font-weight: 700;
       color: #0d2a4e;
       margin-bottom: 6px;
+      animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
     }
 
     .form-sub {
@@ -244,10 +285,12 @@ const LoginScreen = ({ onLogin }) => {
       line-height: 1.6;
       margin-bottom: 26px;
       max-width: 320px;
+      animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
     }
 
     .input-group {
       margin-bottom: 16px;
+      animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
     }
 
     .input-label {
@@ -286,9 +329,7 @@ const LoginScreen = ({ onLogin }) => {
       transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     }
 
-    .form-input::placeholder {
-      color: #9bb3d1;
-    }
+    .form-input::placeholder { color: #9bb3d1; }
 
     .form-input:focus {
       border-color: #185fa5;
@@ -307,9 +348,7 @@ const LoginScreen = ({ onLogin }) => {
       padding: 2px;
     }
 
-    .eye-btn:hover {
-      color: #4a6fa5;
-    }
+    .eye-btn:hover { color: #4a6fa5; }
 
     .error-msg {
       background: rgba(220, 38, 38, 0.08);
@@ -342,20 +381,12 @@ const LoginScreen = ({ onLogin }) => {
       gap: 8px;
       transition: background 0.15s, transform 0.1s;
       box-shadow: 0 8px 20px rgba(24, 95, 165, 0.25);
+      animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both;
     }
 
-    .login-btn:hover:not(:disabled) {
-      background: #0c447c;
-    }
-
-    .login-btn:active:not(:disabled) {
-      transform: scale(0.99);
-    }
-
-    .login-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .login-btn:hover:not(:disabled) { background: #0c447c; }
+    .login-btn:active:not(:disabled) { transform: scale(0.99); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -375,6 +406,17 @@ const LoginScreen = ({ onLogin }) => {
       .brand-panel { padding: 28px; min-height: 220px; }
       .form-panel { padding: 36px 28px; border-left: none; border-top: 1px solid rgba(255,255,255,0.6); }
     }
+
+    /* ── Respect reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      .login-card, .shield-big, .scan-line,
+      .form-title, .form-sub, .input-group, .login-btn {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+      }
+    }
   `;
 
   return (
@@ -391,12 +433,7 @@ const LoginScreen = ({ onLogin }) => {
             <div className="hex-bg" />
 
             <div className="brand-top-row">
-              <svg
-                className="shield-mini"
-                viewBox="0 0 100 116"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg className="shield-mini" viewBox="0 0 100 116" fill="none">
                 <path
                   d="M50 4L8 20v32c0 26.5 18 51.3 42 58 24-6.7 42-31.5 42-58V20L50 4z"
                   fill="rgba(24,95,165,0.4)"
@@ -414,13 +451,10 @@ const LoginScreen = ({ onLogin }) => {
               <span className="brand-name-small">FraudShield</span>
             </div>
 
+            {/* Shield + scan line */}
             <div className="brand-mid">
-              <svg
-                className="shield-big"
-                viewBox="0 0 100 116"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <div className="scan-line" />
+              <svg className="shield-big" viewBox="0 0 100 116" fill="none">
                 <path
                   d="M50 4L8 20v32c0 26.5 18 51.3 42 58 24-6.7 42-31.5 42-58V20L50 4z"
                   fill="rgba(24,95,165,0.35)"

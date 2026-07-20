@@ -13,9 +13,7 @@ import toast from "react-hot-toast";
 import { UserPlus, RefreshCw, Check, X, Users, Key } from "lucide-react";
 import { formatTimestamp } from "../../utils/formatters";
 
-// ============================================================
 // Create Analyst Modal
-// ============================================================
 const CreateAnalystModal = ({ onClose, onSuccess }) => {
   const [form, setForm] = useState({
     username: "",
@@ -250,9 +248,7 @@ const CreateAnalystModal = ({ onClose, onSuccess }) => {
   );
 };
 
-// ============================================================
 // Reset Password Modal
-// ============================================================
 const ResetPasswordModal = ({ analyst, onClose }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -468,9 +464,7 @@ const ResetPasswordModal = ({ analyst, onClose }) => {
   );
 };
 
-// ============================================================
 // Password Requests Panel
-// ============================================================
 const PasswordRequestsPanel = () => {
   const queryClient = useQueryClient();
   const [rejectReason, setRejectReason] = useState("");
@@ -698,9 +692,7 @@ const PasswordRequestsPanel = () => {
   );
 };
 
-// ============================================================
 // Main UserManagement Component
-// ============================================================
 const UserManagement = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);

@@ -352,8 +352,7 @@ def update_transaction_status(transaction_id):
     valid_statuses = [
         'under_review',
         'confirmed_fraud', 
-        'false_positive',
-        'suspicious'
+        'false_positive'
     ]
 
     if status not in valid_statuses:
@@ -395,15 +394,7 @@ def investigation_summary():
     confirmed    = sum(1 for t in all_reviewed if t.get('investigation_status') == 'confirmed_fraud')
     false_pos    = sum(1 for t in all_reviewed if t.get('investigation_status') == 'false_positive')
     under_review = sum(1 for t in all_reviewed if t.get('investigation_status') == 'under_review')
-    suspicious   = sum(1 for t in all_reviewed if t.get('investigation_status') == 'suspicious')
-
-    # False negatives = LEGITIMATE predictions analyst marked as confirmed_fraud or suspicious
-    false_negatives = sum(
-        1 for t in transaction_log
-        if t['prediction'] == 'LEGITIMATE'
-        and t.get('investigation_status') in ('confirmed_fraud', 'suspicious')
-    )
-
+    
     # Unreviewed = fraud transactions analyst hasn't touched yet
     unreviewed = sum(1 for t in fraud_txns if not t.get('investigation_status'))
 
@@ -413,8 +404,6 @@ def investigation_summary():
         "false_positive":  false_pos,
         "under_review":    under_review,
         "unreviewed":      unreviewed,
-        "false_negatives": false_negatives,
-        "suspicious":      suspicious,
     }), 200
 # ROUTE 11 — Flag legitimate transaction as suspicious (persists to DB)
 @app.route('/api/investigations', methods=['POST'])

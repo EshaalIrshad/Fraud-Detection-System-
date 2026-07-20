@@ -17,9 +17,7 @@ authApi.interceptors.request.use((config) => {
   return config;
 });
 
-// ============================================================
 // User Management (Admin only)
-// ============================================================
 export const createAnalyst = async (data) => {
   const response = await authApi.post("/auth/create-analyst", data);
   return response.data;
@@ -42,9 +40,7 @@ export const adminResetPassword = async (userId, newPassword) => {
   return response.data;
 };
 
-// ============================================================
 // Password Requests
-// ============================================================
 export const getPasswordRequests = async (status = "pending") => {
   const response = await authApi.get(
     `/auth/password-requests?status=${status}`,
