@@ -3,14 +3,10 @@ FraudShield is a full-stack fraud detection system that combines machine learnin
 
 ## System Architecture
 React Frontend 
-        ↓  REST API
 Flask Backend 
-        ↓               ↓
-XGBoost + SHAP     Hardhat Blockchain 
-(ML Prediction)    (Immutable Audit Log)
-        ↓
+XGBoost + SHAP     
+Hardhat Blockchain 
 SQLite Database
-(Users, Investigations)
 
 ## Tech Stack
 Frontend-React 18, TanStack Query, Recharts, ethers.js
